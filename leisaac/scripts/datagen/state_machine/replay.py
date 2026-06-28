@@ -95,7 +95,7 @@ def get_next_action(episode_data: EpisodeData, return_state: bool = False, task_
 
 def apply_damping(env, task_type: str):
     """Apply joint damping each step to match state-machine recording behavior."""
-    if task_type in ["so101_state_machine", "lerobot_ver2_state_machine"]:
+    if task_type == "so101_state_machine":
         env.scene["robot"].write_joint_damping_to_sim(damping=10.0)
     elif task_type == "bi_so101_state_machine":
         env.scene["left_arm"].write_joint_damping_to_sim(damping=10.0)

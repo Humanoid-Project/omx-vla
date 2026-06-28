@@ -317,7 +317,6 @@ class HILSerlRobotEnvConfig(EnvConfig):
         return {}
 
 
-@EnvConfig.register_subclass("libero")
 @dataclass
 class LiberoEnv(EnvConfig):
     task: str = "libero_10"  # can also choose libero_spatial, libero_object, etc.
@@ -443,7 +442,6 @@ class LiberoEnv(EnvConfig):
         )
 
 
-@EnvConfig.register_subclass("metaworld")
 @dataclass
 class MetaworldEnv(EnvConfig):
     task: str = "metaworld-push-v2"  # add all tasks
@@ -498,7 +496,6 @@ class MetaworldEnv(EnvConfig):
         )
 
 
-@EnvConfig.register_subclass("robocasa")
 @dataclass
 class RoboCasaEnv(EnvConfig):
     task: str = "CloseFridge"
@@ -573,7 +570,6 @@ class RoboCasaEnv(EnvConfig):
         )
 
 
-@EnvConfig.register_subclass("vlabench")
 @dataclass
 class VLABenchEnv(EnvConfig):
     task: str = "select_fruit"
@@ -718,7 +714,6 @@ class IsaaclabArenaEnv(HubEnvConfig):
         )
 
 
-@EnvConfig.register_subclass("libero_plus")
 @dataclass
 class LiberoPlusEnv(LiberoEnv):
     """Config for LIBERO-plus robustness benchmark evaluation.
@@ -742,7 +737,6 @@ class LiberoPlusEnv(LiberoEnv):
     is_libero_plus: bool = True
 
 
-@EnvConfig.register_subclass("robotwin")
 @dataclass
 class RoboTwinEnvConfig(EnvConfig):
     """Configuration for RoboTwin 2.0 benchmark environments.
@@ -829,7 +823,6 @@ class RoboTwinEnvConfig(EnvConfig):
         )
 
 
-@EnvConfig.register_subclass("robomme")
 @dataclass
 class RoboMMEEnv(EnvConfig):
     """RoboMME memory-augmented manipulation benchmark (ManiSkill/SAPIEN).

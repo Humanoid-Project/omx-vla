@@ -52,16 +52,13 @@ import torch
 from isaaclab.envs import DirectRLEnv, ManagerBasedRLEnv
 from isaaclab.managers import DatasetExportMode, TerminationTermCfg
 from isaaclab_tasks.utils import parse_env_cfg
-from leisaac.datagen.state_machine import PickOrangeStateMachine, PickCubeAndPlaceStateMachine
+from leisaac.datagen.state_machine import PickOrangeStateMachine
 from leisaac.enhance.managers import EnhanceDatasetExportMode, StreamingRecorderManager
 from leisaac.utils.env_utils import dynamic_reset_gripper_effort_limit_sim
 
 # Maps gym task id → (StateMachineClass, device_type)
 TASK_REGISTRY = {
     "LeIsaac-SO101-PickOrange-v0": (PickOrangeStateMachine, "so101_state_machine"),
-    "LeIsaac-SO101-PickOneOrange-v0": (PickOrangeStateMachine, "so101_state_machine"),
-    "LeIsaac-SO101-PickTwoOrange-v0": (PickOrangeStateMachine, "so101_state_machine"),
-    "LeIsaac-SO101-PickCubeAndPlace-v0": (PickCubeAndPlaceStateMachine, "lerobot_ver2_state_machine"),
 }
 
 
@@ -91,10 +88,6 @@ class RateLimiter:
 
 def auto_terminate(env: ManagerBasedRLEnv | DirectRLEnv, success: bool):
     if hasattr(env, "termination_manager"):
-        # The 'success' term only exists when recording (it's added in _configure_env_cfg under
-        # --record). Without it (e.g. GUI dry-runs), there's nothing to force — skip silently.
-        if "success" not in env.termination_manager.active_terms:
-            return
         if success:
             env.termination_manager.set_term_cfg(
                 "success",
@@ -241,7 +234,6 @@ def main():
     env_cfg.seed = args_cli.seed if args_cli.seed is not None else int(time.time())
 
     is_direct_env = "Direct" in task_name
-
     _configure_env_cfg(env_cfg, args_cli, is_direct_env, output_dir, output_file_name)
 
     env: ManagerBasedRLEnv | DirectRLEnv = gym.make(task_name, cfg=env_cfg).unwrapped
@@ -263,14 +255,8 @@ def main():
     if hasattr(env, "initialize"):
         env.initialize()
 
-    # one-time state machine setup (e.g. FK calibration).
-    # num_oranges is owned by the env cfg (the task variant), so the state machine stays in
-    # sync with the scene without a separate CLI flag.
-    sm_kwargs = {}
-    if hasattr(SMClass.__init__, "__code__") and "num_oranges" in SMClass.__init__.__code__.co_varnames:
-        if hasattr(env_cfg, "num_oranges"):
-            sm_kwargs["num_oranges"] = env_cfg.num_oranges
-    sm = SMClass(**sm_kwargs)
+    # one-time state machine setup (e.g. FK calibration)
+    sm = SMClass()
     sm.setup(env)
     env.reset()
     sm.reset()

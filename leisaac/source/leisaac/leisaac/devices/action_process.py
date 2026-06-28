@@ -9,23 +9,15 @@ from leisaac.assets.robots.lerobot import SO101_FOLLOWER_USD_JOINT_LIMLITS
 def init_action_cfg(action_cfg, device):
     """SO101 Follower action configuration: arm_action and gripper_action"""
     if device in ["so101leader", "lekiwi-leader"]:
-        # The policy/teleop stream absolute joint targets (the dataset stores absolute joint
-        # positions via derive_action_from_state). JointPositionAction defaults to
-        # use_default_offset=True, which adds default_joint_pos to the action — for joints whose
-        # rest pose is non-zero (shoulder_lift, elbow_flex) this pushed the target past the joint
-        # limit so it clamped to the rest pose and the arm never moved. Disable the offset so the
-        # commanded absolute target is applied as-is.
         action_cfg.arm_action = mdp.JointPositionActionCfg(
             asset_name="robot",
             joint_names=["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll"],
             scale=1.0,
-            use_default_offset=False,
         )
         action_cfg.gripper_action = mdp.JointPositionActionCfg(
             asset_name="robot",
             joint_names=["gripper"],
             scale=1.0,
-            use_default_offset=False,
         )
     elif device in ["keyboard", "gamepad", "lekiwi-keyboard", "lekiwi-gamepad"]:
         action_cfg.arm_action = mdp.DifferentialInverseKinematicsActionCfg(
@@ -84,10 +76,7 @@ def init_action_cfg(action_cfg, device):
             joint_names=["gripper"],
             scale=1.0,
         )
-    elif device in ["so101_state_machine"]:  # IK-based: action = EE pose (7D) + binary gripper
-        # Full-pose IK (like the working pick_orange): the state machine sends a fixed vertical
-        # orientation so the gripper approaches top-down and lowers straight down on z. (Tried
-        # position-only to free the wrist for dy, but it leaves the wrist in a wrong/raised pose.)
+    elif device in ["so101_state_machine"]:  # IK-based: action = EE pose (7D) + binary gripper, not raw joint angles
         action_cfg.arm_action = mdp.DifferentialInverseKinematicsActionCfg(
             asset_name="robot",
             joint_names=["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll"],
@@ -100,24 +89,7 @@ def init_action_cfg(action_cfg, device):
             asset_name="robot",
             joint_names=["gripper"],
             open_command_expr={"gripper": 1.0},
-            # 0.4 -> 0.3 -> 0.2 -> 0.25: open slightly more so the fingers wrap the 6cm ball
-            # without interpenetrating its mesh, while still clamping it.
-            close_command_expr={"gripper": 0.25},
-        )
-    elif device in ["lerobot_ver2_state_machine"]:  # custom arm: state machine sends absolute joint targets
-        action_cfg.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot",
-            joint_names=["base", "shoulder", "elbow", "wrist_pitch", "wrist_roll"],
-            scale=1.0,
-            use_default_offset=False,
-            preserve_order=True,
-        )
-        action_cfg.gripper_action = mdp.JointPositionActionCfg(
-            asset_name="robot",
-            joint_names=["gripper"],
-            scale=1.0,
-            use_default_offset=False,
-            preserve_order=True,
+            close_command_expr={"gripper": 0.4},
         )
     elif device in ["bi_so101_state_machine"]:  # IK-based: action = EE pose (7D) + binary gripper, not raw joint angles
         action_cfg.left_arm_action = mdp.DifferentialInverseKinematicsActionCfg(

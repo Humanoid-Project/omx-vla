@@ -27,10 +27,6 @@ class LeRobotDatasetCfg:
     """Features for the LeRobotDataset."""
     action_align: bool = False
     """Whether the action shape equals to the joint number. If action align, we will convert action to lerobot limit range."""
-    derive_action_from_state: bool = False
-    """If True, record the action as the next-step joint state (action[t] = joint_pos[t+1]) instead of the
-    raw env action. Set automatically when the env uses a non-joint action space (e.g. IK pose targets),
-    so the recorded dataset is in 6D joint space regardless of how the robot is driven."""
 
 
 class LeRobotDatasetHandler(DatasetFileHandlerBase):
@@ -83,10 +79,7 @@ class LeRobotDatasetHandler(DatasetFileHandlerBase):
         self._lerobot_dataset.save_episode(parallel_encoding=False)
 
     def clear(self):
-        # On resume the dataset is opened without an episode buffer (None until the
-        # first add_frame). Skip clearing when there is nothing buffered yet.
-        if getattr(self._lerobot_dataset, "episode_buffer", None) is not None:
-            self._lerobot_dataset.clear_episode_buffer()
+        self._lerobot_dataset.clear_episode_buffer()
 
     def finalize(self):
         self._lerobot_dataset.finalize()
@@ -104,12 +97,7 @@ class LeRobotDatasetHandler(DatasetFileHandlerBase):
         raise NotImplementedError("load_episode is not supported for LeRobotDatasetHandler")
 
     def get_num_episodes(self) -> int:
-        if self._lerobot_dataset is None:
-            return 0
-        meta = getattr(self._lerobot_dataset, "meta", None)
-        if meta is not None and hasattr(meta, "total_episodes"):
-            return int(meta.total_episodes)
-        return int(getattr(self._lerobot_dataset, "num_episodes", 0))
+        raise NotImplementedError("get_num_episodes is not supported for LeRobotDatasetHandler")
 
 
 # Create a simple fallback recorder if LeRobot is missing

@@ -149,17 +149,6 @@ def main():
     # create environment
     env: ManagerBasedRLEnv = gym.make(args_cli.task, cfg=env_cfg).unwrapped
 
-    # Disable gravity on every robot link, exactly as the state-machine data collection does
-    # (generate.py). The demos were recorded with gravity off, so the policy never learned to
-    # compensate for it; with gravity on at eval time the weak SO-101 actuators sag and the arm
-    # only trembles instead of following the commanded joint targets.
-    from pxr import PhysxSchema, UsdPhysics
-
-    _stage = omni.usd.get_context().get_stage()
-    for _prim in _stage.Traverse():
-        if "Robot" in str(_prim.GetPath()) and _prim.HasAPI(UsdPhysics.RigidBodyAPI):
-            PhysxSchema.PhysxRigidBodyAPI.Apply(_prim).CreateDisableGravityAttr(True)
-
     # create policy
     model_type = args_cli.policy_type
     if args_cli.policy_type == "gr00tn1.5":

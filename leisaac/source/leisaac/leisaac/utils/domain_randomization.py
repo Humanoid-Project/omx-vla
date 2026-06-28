@@ -48,34 +48,6 @@ def randomize_particle_object_uniform(
     )
 
 
-def randomize_visual_material_color_uniform(
-    name: str,
-    color_range: dict[str, tuple[float, float]],
-    shader_path: str = "geometry/material/Shader",
-) -> EventTerm:
-    return EventTerm(
-        func=enhance_mdp.randomize_visual_material_color_uniform,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg(name),
-            "color_range": color_range,
-            "shader_path": shader_path,
-        },
-    )
-
-
-def randomize_light_uniform(
-    name: str,
-    intensity_range: tuple[float, float],
-    color_range: dict[str, tuple[float, float]] | None = None,
-) -> EventTerm:
-    return EventTerm(
-        func=enhance_mdp.randomize_light_uniform,
-        mode="reset",
-        params={"asset_cfg": SceneEntityCfg(name), "intensity_range": intensity_range, "color_range": color_range},
-    )
-
-
 def domain_randomization(env_cfg, random_options: list[EventTerm]):
     for idx, event_item in enumerate(random_options):
         setattr(env_cfg.events, f"domain_randomize_{idx}", event_item)

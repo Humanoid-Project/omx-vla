@@ -53,20 +53,13 @@ def build_feature_from_env(env: ManagerBasedEnv | DirectRLEnv, dataset_cfg: LeRo
         action_dim = env.actions.shape[-1]
 
     if action_dim != len(default_feature_joint_names):
-        # The env is driven by a non-joint action space (e.g. IK pose targets for the state
-        # machine), so the raw env action is not joint-space. Instead of recording those raw
-        # dims, we record joint positions as the action (action[t] = joint_pos[t+1], handled in
-        # build_lerobot_frame + LeRobotRecorderManager). The action feature therefore mirrors
-        # observation.state (joint names / 6D) so the dataset is clean joint-space.
-        action_joint_names = default_feature_joint_names
-        action_feature_dim = len(default_feature_joint_names)
+        # [A bit tricky, currently works because the action dimension matches the joints only when we use leader control]
+        action_joint_names = [f"dim_{index}" for index in range(action_dim)]
         dataset_cfg.action_align = False
-        dataset_cfg.derive_action_from_state = True
     else:
         action_joint_names = default_feature_joint_names
-        action_feature_dim = action_dim
         dataset_cfg.action_align = True
-    features["action"] = asdict(StateFeatureItem(dtype="float32", shape=(action_feature_dim,), names=action_joint_names))
+    features["action"] = asdict(StateFeatureItem(dtype="float32", shape=(action_dim,), names=action_joint_names))
     features["observation.state"] = asdict(
         StateFeatureItem(dtype="float32", shape=(len(default_feature_joint_names),), names=default_feature_joint_names)
     )

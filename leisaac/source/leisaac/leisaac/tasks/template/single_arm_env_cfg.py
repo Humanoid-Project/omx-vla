@@ -194,7 +194,7 @@ class SingleArmTaskEnvCfg(ManagerBasedRLEnvCfg):
     def use_teleop_device(self, teleop_device) -> None:
         self.task_type = teleop_device
         self.actions = init_action_cfg(self.actions, device=teleop_device)
-        if teleop_device in ["keyboard", "gamepad", "so101_state_machine", "lerobot_ver2_state_machine"]:
+        if teleop_device in ["keyboard", "gamepad", "so101_state_machine"]:
             self.scene.robot.spawn.rigid_props.disable_gravity = True
 
     def preprocess_device_action(self, action: dict[str, Any], teleop_device) -> torch.Tensor:
@@ -202,20 +202,14 @@ class SingleArmTaskEnvCfg(ManagerBasedRLEnvCfg):
 
     def build_lerobot_frame(self, episode_data: EpisodeData, dataset_cfg: LeRobotDatasetCfg) -> dict:
         obs_data = episode_data._data["obs"]
-        joint_state_6d = convert_leisaac_action_to_lerobot(obs_data["joint_pos"][-1].unsqueeze(0)).squeeze(0)
-        if getattr(dataset_cfg, "derive_action_from_state", False):
-            # Joint-space action: mirror the joint state here; LeRobotRecorderManager shifts it
-            # forward one step (action[t] = joint_pos[t+1]) so the policy predicts the next target.
-            processed_action = joint_state_6d.copy()
+        action = episode_data._data["actions"][-1]
+        if dataset_cfg.action_align:
+            processed_action = convert_leisaac_action_to_lerobot(action.unsqueeze(0)).squeeze(0)
         else:
-            action = episode_data._data["actions"][-1]
-            if dataset_cfg.action_align:
-                processed_action = convert_leisaac_action_to_lerobot(action.unsqueeze(0)).squeeze(0)
-            else:
-                processed_action = action.cpu().numpy()
+            processed_action = action.cpu().numpy()
         frame = {
             "action": processed_action,
-            "observation.state": joint_state_6d,
+            "observation.state": convert_leisaac_action_to_lerobot(obs_data["joint_pos"][-1].unsqueeze(0)).squeeze(0),
             "task": self.task_description,
         }
         for frame_key in dataset_cfg.features.keys():

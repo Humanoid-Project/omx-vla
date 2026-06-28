@@ -229,16 +229,8 @@ class LeRobotServicePolicyClient(Policy):
             self.last_action = np.zeros((1, 6))
         # TODO: add bi-arm support
 
-        # Our LeRobot datasets (and thus the trained model) use the raw camera keys
-        # (observation.images.front / .wrist) directly, so no remap is needed. The old
-        # default ({"front": "camera1", "wrist": "camera2"}) assumed a different dataset
-        # convention and caused a KeyError ('observation.images.camera2') at inference.
-        CAMERA_KEY_REMAP = {}
-        self.camera_key_remap = {k: CAMERA_KEY_REMAP.get(k, k) for k in camera_infos}
-
         for camera_key, camera_image_shape in camera_infos.items():
-            model_key = self.camera_key_remap[camera_key]
-            lerobot_features[f"observation.images.{model_key}"] = {
+            lerobot_features[f"observation.images.{camera_key}"] = {
                 "dtype": "image",
                 "shape": (camera_image_shape[0], camera_image_shape[1], 3),
                 "names": ["height", "width", "channels"],
@@ -277,8 +269,7 @@ class LeRobotServicePolicyClient(Policy):
 
     def _send_observation(self, observation_dict: dict):
         raw_observation = {
-            self.camera_key_remap[key]: observation_dict[key].cpu().numpy().astype(np.uint8)[0]
-            for key in self.camera_keys
+            f"{key}": observation_dict[key].cpu().numpy().astype(np.uint8)[0] for key in self.camera_keys
         }
         raw_observation["task"] = observation_dict["task_description"]
 

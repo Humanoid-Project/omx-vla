@@ -5,12 +5,7 @@ def dynamic_reset_gripper_effort_limit_sim(env, teleop_device):
     need_to_set = []
     if "bi-so101leader" in teleop_device:
         need_to_set = [env.scene.articulations["left_arm"], env.scene.articulations["right_arm"]]
-    elif "so101leader" in teleop_device or teleop_device in [
-        "keyboard",
-        "gamepad",
-        "so101_state_machine",
-        "lerobot_ver2_state_machine",
-    ]:
+    elif "so101leader" in teleop_device or teleop_device in ["keyboard", "gamepad"]:
         need_to_set = [env.scene["robot"]]
     for arm in need_to_set:
         write_gripper_effort_limit_sim(env, arm)
@@ -43,14 +38,7 @@ def write_gripper_effort_limit_sim(env, env_arm):
 
     target_masses = object_masses[min_indices.cpu(), 0, 0]  # [num_envs]
 
-    # Effort limit scales with the held object's mass. The divisor sets grip headroom: a
-    # smaller value gives a stronger grip. Lowered 0.15 -> 0.08 to fix frequent weak grasps
-    # (the orange slipping out of the fingers during lift/transport).
-    # A floor keeps very light objects graspable (a light ball would otherwise get ~0.03 Nm and
-    # not be clamped at all). But too high a floor over-squeezes a light ball and the finger mesh
-    # interpenetrates it during carry, so 0.3 Nm: enough to hold a ~10g ball, gentle enough not to
-    # crush it. (max => no effect on heavier objects like the orange.)
-    target_effort_limits = torch.clamp(target_masses / 0.08, min=0.3).to(env_arm._data.joint_effort_limits.device)
+    target_effort_limits = (target_masses / 0.15).to(env_arm._data.joint_effort_limits.device)
 
     current_effort_limit_sim = env_arm._data.joint_effort_limits[:, -1]  # [num_envs]
     need_update = torch.abs(target_effort_limits - current_effort_limit_sim) > 0.1
@@ -68,8 +56,6 @@ def get_task_type(task: str, task_type: str | None = None) -> str:
     """
     if task_type is not None:
         return task_type
-    if "PickCubeAndPlace" in task:
-        return "lerobot_ver2_state_machine"
     if "BiArm" in task:
         return "bi-so101leader"
     elif "LeKiwi" in task:

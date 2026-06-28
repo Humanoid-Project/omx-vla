@@ -10,24 +10,6 @@ gym.register(
 )
 
 gym.register(
-    id="LeIsaac-SO101-PickOneOrange-v0",
-    entry_point="isaaclab.envs:ManagerBasedRLEnv",
-    disable_env_checker=True,
-    kwargs={
-        "env_cfg_entry_point": f"{__name__}.pick_orange_env_cfg:PickOneOrangeEnvCfg",
-    },
-)
-
-gym.register(
-    id="LeIsaac-SO101-PickTwoOrange-v0",
-    entry_point="isaaclab.envs:ManagerBasedRLEnv",
-    disable_env_checker=True,
-    kwargs={
-        "env_cfg_entry_point": f"{__name__}.pick_orange_env_cfg:PickTwoOrangeEnvCfg",
-    },
-)
-
-gym.register(
     id="LeIsaac-SO101-PickOrange-Mimic-v0",
     entry_point=f"leisaac.enhance.envs:ManagerBasedRLLeIsaacMimicEnv",
     disable_env_checker=True,

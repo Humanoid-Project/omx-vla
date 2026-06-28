@@ -36,9 +36,6 @@ class LeRobotRecorderManager(RecorderManager):
 
         self._skip_frames = 5
         self._env_steps_record = torch.zeros(self._env.num_envs)
-        # One-step buffer used when derive_action_from_state is set: holds the most recent
-        # frame so its action can be set to the *next* step's joint state before exporting.
-        self._pending_frames: dict[int, dict] = {}
 
     def __str__(self) -> str:
         msg = "[Enhanced] LeRobotRecorderManager. \n"
@@ -52,8 +49,6 @@ class LeRobotRecorderManager(RecorderManager):
         if env_ids is None:
             env_ids = list(range(self._env.num_envs))
         self._env_steps_record[env_ids] = 0
-        for eid in (env_ids.tolist() if isinstance(env_ids, torch.Tensor) else env_ids):
-            self._pending_frames.pop(eid, None)
         return super().reset(env_ids)
 
     def record_post_step(self) -> None:
@@ -65,15 +60,7 @@ class LeRobotRecorderManager(RecorderManager):
         if self._env_steps_record[env_idx] <= self._skip_frames:
             return
         frame = self._env.cfg.build_lerobot_frame(self._episodes[env_idx], self._dataset_cfg)
-        if getattr(self._dataset_cfg, "derive_action_from_state", False):
-            # Shift action forward one step: the previous frame's action = this frame's joint state.
-            pending = self._pending_frames.get(env_idx)
-            if pending is not None:
-                pending["action"] = frame["observation.state"].copy()
-                self._dataset_file_handler.add_frame(pending)
-            self._pending_frames[env_idx] = frame
-        else:
-            self._dataset_file_handler.add_frame(frame)
+        self._dataset_file_handler.add_frame(frame)
         self._episodes[env_idx]._data.clear()
 
     def export_episodes(self, env_ids: Sequence[int] | None = None) -> None:
@@ -92,17 +79,11 @@ class LeRobotRecorderManager(RecorderManager):
                 episode_succeeded = self._episodes[env_id].success
                 target_dataset_file_handler = self._dataset_file_handler
                 if episode_succeeded:
-                    # Flush the buffered final frame (its action already holds its own joint
-                    # state, i.e. "hold" at the last step) before exporting the episode.
-                    pending = self._pending_frames.pop(env_id, None)
-                    if pending is not None:
-                        self._dataset_file_handler.add_frame(pending)
                     target_dataset_file_handler.flush()
                     self._exported_successful_episode_count[env_id] = (
                         self._exported_successful_episode_count.get(env_id, 0) + 1
                     )
                 else:
-                    self._pending_frames.pop(env_id, None)
                     target_dataset_file_handler.clear()
                     self._exported_failed_episode_count[env_id] = (
                         self._exported_failed_episode_count.get(env_id, -1) + 1

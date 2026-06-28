@@ -97,7 +97,7 @@ LEKIWI_CFG = ArticulationCfg(
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.0),
-        rot=(0.0, 0.0, 0.0, 1.0),
+        rot=(1.0, 0.0, 0.0, 0.0),
         joint_pos={
             "shoulder_pan": 0.0,
             "shoulder_lift": 0.0,
@@ -136,75 +136,3 @@ LEKIWI_CFG = ArticulationCfg(
     },
     soft_joint_pos_limit_factor=1.0,
 )
-
-
-"""Configuration for the custom lerobot_ver2 arm (5 revolute DOF + gripper, XL-430 motors).
-
-Joint chain (serial): base_link -[base]-> J1 -[shoulder]-> J2 -[elbow]-> J3
--[wrist_pitch]-> J4 -[wrist_roll]-> J5 -[gripper]-> gripper.
-Role mapping vs SO101: base<->shoulder_pan, shoulder<->shoulder_lift,
-elbow<->elbow_flex, wrist_pitch<->wrist_flex, wrist_roll<->wrist_roll, gripper<->gripper.
-"""
-# USD lives inside the description folder (converted by
-# lerobot_ver2/convert_to_usd.py from the gripper-corrected URDF).
-LEROBOT_VER2_ASSET_PATH = Path("/home/polygon/lerobot_isaac/lerobot/lerobot_ver2/lerobot_arm.usd")
-
-# Order matters: this is the articulation joint order used by the state machine /
-# action pipeline (arm 5-DOF first, gripper last).
-LEROBOT_VER2_ARM_JOINTS = ["base", "shoulder", "elbow", "wrist_pitch", "wrist_roll"]
-
-LEROBOT_VER2_CFG = ArticulationCfg(
-    spawn=sim_utils.UsdFileCfg(
-        usd_path=str(LEROBOT_VER2_ASSET_PATH),
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
-            disable_gravity=False,
-        ),
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=True,
-            solver_position_iteration_count=4,
-            solver_velocity_iteration_count=4,
-            fix_root_link=True,
-        ),
-    ),
-    init_state=ArticulationCfg.InitialStateCfg(
-        pos=(2.2, -0.61, 0.89),
-        rot=(1.0, 0.0, 0.0, 0.0),
-        joint_pos={
-            # base_link is yaw-rotated 180 deg in the USD, so the base joint can stay at URDF home.
-            "base": 0.0,
-            "shoulder": 0.0,
-            "elbow": 0.0,
-            # URDF home for wrist_pitch is 0 deg (limit [-180, 0]); keep it at home.
-            "wrist_pitch": 0.0,
-            "wrist_roll": 0.0,
-            "gripper": 0.0,
-        },
-    ),
-    actuators={
-        "xl430-gripper": ImplicitActuatorCfg(
-            joint_names_expr=["gripper"],
-            effort_limit_sim=18,
-            velocity_limit_sim=12,
-            stiffness=28.0,
-            damping=2.0,
-        ),
-        "xl430-arm": ImplicitActuatorCfg(
-            joint_names_expr=LEROBOT_VER2_ARM_JOINTS,
-            effort_limit_sim=24,
-            velocity_limit_sim=12,
-            stiffness=32.0,
-            damping=3.5,
-        ),
-    },
-    soft_joint_pos_limit_factor=1.0,
-)
-
-# joint limit written in USD (degree)
-LEROBOT_VER2_USD_JOINT_LIMITS = {
-    "base": (-180.0, 270.0),
-    "shoulder": (-90.0, 90.0),
-    "elbow": (-90.0, 90.0),
-    "wrist_pitch": (-180.0, 0.0),
-    "wrist_roll": (-175.0, 175.0),
-    "gripper": (-90.0, 5.0),
-}

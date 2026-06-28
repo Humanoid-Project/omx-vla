@@ -74,18 +74,8 @@ scripts/environments/teleoperation/.cache/
 # scene assets
 assets/scenes/*
 !assets/scenes/.gitkeep
-!assets/scenes/simple_pick_and_place/
-!assets/scenes/simple_pick_and_place/**
 assets/robots/*
 !assets/robots/.gitkeep
 
 # greenscreen
 greenscreen/*
-
-# Dev / CI / docs — not for the public repo
-docs/
-CONTRIBUTING.md
-.flake8
-.pre-commit-config.yaml
-.dockerignore
-.github/
