@@ -1,4 +1,4 @@
-# LeRobot × LeIsaac
+# lerobot_isaac
 
 [![LeRobot](https://img.shields.io/badge/LeRobot-HuggingFace-FFD21E?logo=github&logoColor=black)](https://github.com/huggingface/lerobot)
 [![LeIsaac](https://img.shields.io/badge/LeIsaac-LightwheelAI-4A90D9?logo=github&logoColor=white)](https://github.com/LightwheelAI/leisaac)
