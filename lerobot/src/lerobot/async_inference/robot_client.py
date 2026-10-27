@@ -52,6 +52,8 @@ from lerobot.cameras.realsense import RealSenseCameraConfig  # noqa: F401
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    bi_so_follower,
+    koch_follower,
     make_robot_from_config,
     omx_follower,
     so_follower,

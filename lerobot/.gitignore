@@ -87,11 +87,6 @@ pip-delete-this-directory.txt
 celerybeat-schedule
 celerybeat.pid
 
-# AI agent config dirs
-.claude/
-.codex/
-.agents/
-
 ### IDE & Editor Config ###
 # VS Code
 .vscode/
@@ -181,14 +176,3 @@ outputs/
 *.urdf
 *.xml
 *.part
-
-# lerobot_ver2: source meshes/URDFs/XMLs must be tracked (override above rules)
-!lerobot_ver2/**/*.stl
-!lerobot_ver2/**/*.urdf
-!lerobot_ver2/**/*.xacro
-!lerobot_ver2/**/*.xml
-
-# AI agent / docs files — not for the public repo
-AGENT_GUIDE.md
-AGENTS.md
-CLAUDE.md

@@ -66,8 +66,8 @@ class SmolVLAConfig(PreTrainedConfig):
     use_cache: bool = True
 
     # Finetuning settings
-    freeze_vision_encoder: bool = True # 비전 인코더 동결
-    train_expert_only: bool = True # expert head만 학습
+    freeze_vision_encoder: bool = True
+    train_expert_only: bool = True
     train_state_proj: bool = True
 
     # Training presets

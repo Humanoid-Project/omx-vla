@@ -151,19 +151,40 @@ import logging
 
 from lerobot.cameras.opencv import OpenCVCameraConfig  # noqa: F401
 from lerobot.cameras.realsense import RealSenseCameraConfig  # noqa: F401
+from lerobot.cameras.zmq import ZMQCameraConfig  # noqa: F401
 from lerobot.configs import parser
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    bi_openarm_follower,
+    bi_rebot_b601_follower,
+    bi_so_follower,
+    earthrover_mini_plus,
+    hope_jr,
+    koch_follower,
     omx_follower,
+    openarm_follower,
+    reachy2,
+    rebot_b601_follower,
     so_follower,
+    unitree_g1 as unitree_g1_robot,
 )
 from lerobot.rollout import RolloutConfig, build_rollout_context, create_strategy
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
+    bi_openarm_leader,
+    bi_rebot_102_leader,
+    bi_so_leader,
+    homunculus,
+    koch_leader,
     omx_leader,
+    openarm_leader,
+    openarm_mini,
+    reachy2_teleoperator,
+    rebot_102_leader,
     so_leader,
+    unitree_g1,
 )
 from lerobot.utils.import_utils import register_third_party_plugins
 from lerobot.utils.process import ProcessSignalHandler

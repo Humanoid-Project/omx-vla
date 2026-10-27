@@ -1,0 +1,2 @@
+SUBSYSTEM=="tty", ATTRS{serial}=="FOLLOWER_SERIAL", SYMLINK+="omx_follower"
+SUBSYSTEM=="tty", ATTRS{serial}=="LEADER_SERIAL", SYMLINK+="omx_leader"

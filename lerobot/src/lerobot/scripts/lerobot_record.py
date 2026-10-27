@@ -93,7 +93,9 @@ from pprint import pformat
 
 from lerobot.cameras import CameraConfig  # noqa: F401
 from lerobot.cameras.opencv import OpenCVCameraConfig  # noqa: F401
+from lerobot.cameras.reachy2_camera import Reachy2CameraConfig  # noqa: F401
 from lerobot.cameras.realsense import RealSenseCameraConfig  # noqa: F401
+from lerobot.cameras.zmq import ZMQCameraConfig  # noqa: F401
 from lerobot.common.control_utils import (
     init_keyboard_listener,
     is_headless,
@@ -117,16 +119,36 @@ from lerobot.processor import (
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    bi_openarm_follower,
+    bi_rebot_b601_follower,
+    bi_so_follower,
+    earthrover_mini_plus,
+    hope_jr,
+    koch_follower,
     make_robot_from_config,
     omx_follower,
+    openarm_follower,
+    reachy2,
+    rebot_b601_follower,
     so_follower,
+    unitree_g1 as unitree_g1_robot,
 )
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
+    bi_openarm_leader,
+    bi_rebot_102_leader,
+    bi_so_leader,
+    homunculus,
+    koch_leader,
     make_teleoperator_from_config,
     omx_leader,
+    openarm_leader,
+    openarm_mini,
+    reachy2_teleoperator,
+    rebot_102_leader,
     so_leader,
+    unitree_g1,
 )
 from lerobot.teleoperators.keyboard import KeyboardTeleop
 from lerobot.utils.constants import ACTION, OBS_STR

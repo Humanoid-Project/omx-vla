@@ -2,7 +2,69 @@
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
+.venv/
+venv/
+.env
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Run outputs
+outputs/
+data/
+wandb/
+logs/
+*.log
+
+# Local machine settings
+real/omx/99-omx.rules
+real/omx/env.local.sh
+
+# lerobot: non-code upstream files
+lerobot/docs/
+lerobot/docs-requirements.txt
+lerobot/tests/
+lerobot/media/
+lerobot/docker/
+lerobot/.dockerignore
+lerobot/.github/
+lerobot/scripts/
+lerobot/Makefile
+lerobot/.pre-commit-config.yaml
+lerobot/requirements.in
+lerobot/requirements-macos.txt
+lerobot/requirements-ubuntu.txt
+lerobot/uv.lock
+lerobot/CONTRIBUTING.md
+lerobot/CODE_OF_CONDUCT.md
+lerobot/SECURITY.md
+lerobot/AI_POLICY.md
+lerobot/AGENT_GUIDE.md
+lerobot/AGENTS.md
+lerobot/CLAUDE.md
+lerobot/examples/*
+!lerobot/examples/omx/
+
+# leisaac: non-code upstream files and local assets
+leisaac/docs/
+leisaac/.github/
+leisaac/dependencies/
+leisaac/.gitmodules
+leisaac/.dockerignore
+leisaac/.flake8
+leisaac/.pre-commit-config.yaml
+leisaac/CONTRIBUTING.md
+leisaac/scripts/tutorials/
+leisaac/assets/robots/*
+!leisaac/assets/robots/.gitkeep
+leisaac/assets/scenes/*
+!leisaac/assets/scenes/.gitkeep
+leisaac/datasets/
+leisaac/logs/
+leisaac/outputs/
