@@ -28,7 +28,7 @@ Teleoperation data collection, ACT / SmolVLA training and rollout on the ROBOTIS
 
 ```
 lerobot/     LeRobot (upstream, unmodified) — datasets, training, real-robot drivers
-leisaac/     LeIsaac (upstream, unmodified) — Isaac Sim tasks and teleoperation
+leisaac/     LeIsaac (upstream, .gitignore only changed) — Isaac Sim tasks and teleoperation
 real/omx/    Scripts and settings for the real OMX arm
 ```
 

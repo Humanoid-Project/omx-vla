@@ -32,10 +32,10 @@ copyright and license headers in its source files.
   - Files derived from Isaac Lab — BSD-3-Clause, Copyright (c) 2022-2025 The Isaac Lab Project Developers
     (`leisaac/source/leisaac/leisaac/__init__.py`, `leisaac/source/leisaac/leisaac/tasks/__init__.py`,
     `leisaac/source/leisaac/leisaac/devices/device_base.py`, `leisaac/scripts/environments/list_envs.py`,
-    `leisaac/scripts/environments/teleoperation/teleop_se3_agent.py`, `leisaac/.vscode/tools/setup_vscode.py`)
-- Not redistributed here: `docs/`, `.github/`, `scripts/tutorials/`, and robot/scene assets under
+    `leisaac/scripts/environments/teleoperation/teleop_se3_agent.py`)
+- Not redistributed here: `docs/`, `.github/`, `.vscode/`, `scripts/tutorials/`, and robot/scene assets under
   `assets/` (downloaded separately; they carry their own licenses).
-- Modifications: none.
+- Modifications: `leisaac/.gitignore` — removed the `!.vscode` exception (marked at the top of the file).
 
 ## Modifying these files
 
