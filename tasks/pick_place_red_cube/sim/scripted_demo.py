@@ -102,7 +102,7 @@ for ep in range(1, args.episodes + 1):
             obs, *_ = env.step(act)
             states.append(obs["policy"]["joint_pos"][0].cpu().numpy())
             actions.append(act[0].cpu().numpy())
-            success = bool(cube_in_square(env, square_center=sq, square_half_size=task_cfg.SQUARE_SIZE / 2)[0])
+            success = bool(cube_in_square(env, square_center=sq, square_half_size=(task_cfg.SQUARE_SIZE[0] / 2, task_cfg.SQUARE_SIZE[1] / 2))[0])
             render(obs, ep, phase, success)
         q_prev, g_prev = q_goal, g_goal
     for _ in range(int(0.5 * task_cfg.FPS)):

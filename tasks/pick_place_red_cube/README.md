@@ -28,7 +28,7 @@ The task sentence, camera names, resolution and fps must stay identical between 
 ## Simulation
 
 Isaac Lab environment `OMX-PickPlaceRedCube-v0`: blue OMX-F, white table, yellow wall behind the robot, 3 cm red cube,
-7 cm filled black square, `top` and `wrist` cameras. It uses the `isaacsim` conda env for collection and `lerobot-omx`
+8.1 × 10.4 cm filled black rectangle (depth × width), `top` and `wrist` cameras. It uses the `isaacsim` conda env for collection and `lerobot-omx`
 for export; nothing is installed into either.
 
 Once, after a fresh clone:

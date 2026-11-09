@@ -155,6 +155,7 @@ def cube_state():
 
 def arm_q(x, y, z, yaw, pitch=math.pi / 2, wrist=None):
     pitches = [pitch] if pitch >= math.pi / 2 else list(np.linspace(pitch, math.pi / 2, 4))
+    pitches += list(np.arange(pitch - math.radians(2.5), math.radians(20.0) - 1e-9, -math.radians(2.5)))
     for p in pitches:
         zz = z
         while zz >= min(z, 0.05) - 1e-9:
@@ -175,6 +176,18 @@ def reachable_z(x, y, z, pitch):
         except ValueError:
             z -= 0.002
     raise ValueError(f"target out of reach: {(x, y)} at pitch {math.degrees(pitch):.0f}")
+
+
+def feasible_pitch(x, y, zs, pitch, lowest=math.radians(20.0)):
+    p = pitch
+    while p >= lowest - 1e-9:
+        try:
+            for z in zs:
+                inverse_top_down(x, y, z, p)
+            return p
+        except ValueError:
+            p -= math.radians(2.5)
+    raise ValueError(f"target out of reach: {(x, y)} for z {zs}")
 
 
 def u(lo, hi):
@@ -289,6 +302,9 @@ def run_episode(rec, speed, knobs):
     grasp_z = u(0.005, 0.009)
     grasp_pitch = math.radians(u(72.0, 90.0))
     hover_pitch = max(math.radians(60.0), grasp_pitch - math.radians(u(0.0, 15.0)))
+    (cx0, cy0, _), _ = cube_state()
+    grasp_pitch = feasible_pitch(cx0, cy0, (grasp_z, hover + 0.04), grasp_pitch)
+    hover_pitch = min(hover_pitch, grasp_pitch)
     knobs.update(hover=hover, grasp_z=grasp_z, grasp_pitch_deg=math.degrees(grasp_pitch),
                  hover_pitch_deg=math.degrees(hover_pitch))
 
@@ -359,6 +375,7 @@ def run_episode(rec, speed, knobs):
     w_place = w_pick + u(-0.35, 0.35)
     place_pitch = math.radians(u(72.0, 90.0))
     place_z = u(0.012, 0.018)
+    place_pitch = feasible_pitch(sx, sy, (place_z, hover + 0.03), place_pitch)
     knobs.update(wrist_place=w_place, place_pitch_deg=math.degrees(place_pitch))
     move_via = None
     if chance(0.6):
@@ -449,7 +466,7 @@ for ep in range(args.episodes):
     except ValueError as exc:
         recovered, error = False, str(exc)
     success = error is None and bool(
-        cube_in_square(env, square_center=task_cfg.SQUARE_CENTER, square_half_size=task_cfg.SQUARE_SIZE / 2)[0]
+        cube_in_square(env, square_center=task_cfg.SQUARE_CENTER, square_half_size=(task_cfg.SQUARE_SIZE[0] / 2, task_cfg.SQUARE_SIZE[1] / 2))[0]
     )
     cube_end, _ = cube_state()
     np.savez(

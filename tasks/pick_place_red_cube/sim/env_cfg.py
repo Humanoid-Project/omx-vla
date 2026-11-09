@@ -28,10 +28,13 @@ TASK_DESCRIPTION = "Pick up the red cube and place it inside the black square."
 
 FPS = 30
 CUBE_SIZE = 0.03
-SQUARE_SIZE = 0.07
-SQUARE_CENTER = (0.17, 0.12)
-CUBE_SPAWN_CENTER = (0.19, -0.05)
-CUBE_SPAWN_HALF_RANGE = (0.05, 0.07)
+SQUARE_SIZE = (0.081, 0.104)
+SQUARE_CENTER = (0.21, -0.08)
+CUBE_RING_RADIUS = (0.09, 0.15)
+CUBE_RING_DIRECTIONS = 8
+CUBE_RING_JITTER = math.radians(10.0)
+CUBE_MIN_X = 0.11
+CUBE_MAX_REACH = 0.35
 
 TABLE_X = (-0.25, 0.65)
 TABLE_Y = (-0.45, 0.45)
@@ -39,10 +42,10 @@ TABLE_THICKNESS = 0.04
 WALL_HEIGHT = 0.6
 WALL_THICKNESS = 0.02
 
-CAMERA_HFOV_DEG = 70.0
+CAMERA_HFOV_DEG = 51.0
 CAMERA_APERTURE = 20.955
-TOP_CAMERA_EYE = (0.42, 0.0, 0.40)
-TOP_CAMERA_TARGET = (0.13, 0.02, 0.0)
+TOP_CAMERA_EYE = (0.57, 0.0, 0.40)
+TOP_CAMERA_TARGET = (0.09, 0.02, 0.0)
 WRIST_CAMERA_EYE = (0.05, 0.0, 0.072)
 WRIST_CAMERA_TARGET = (0.13, 0.0, -0.03)
 WRIST_CAMERA_HFOV_DEG = 80.0
@@ -110,7 +113,7 @@ class PickPlaceRedCubeSceneCfg(InteractiveSceneCfg):
     )
     target_square = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/TargetSquare",
-        spawn=_box((SQUARE_SIZE, SQUARE_SIZE, 0.0005), BLACK, collision=False),
+        spawn=_box((SQUARE_SIZE[0], SQUARE_SIZE[1], 0.0005), BLACK, collision=False),
         init_state=AssetBaseCfg.InitialStateCfg(pos=(SQUARE_CENTER[0], SQUARE_CENTER[1], 0.00025)),
     )
     cube = RigidObjectCfg(
@@ -123,7 +126,7 @@ class PickPlaceRedCubeSceneCfg(InteractiveSceneCfg):
             physics_material=sim_utils.RigidBodyMaterialCfg(static_friction=1.5, dynamic_friction=1.2),
             visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=RED, roughness=0.6),
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(CUBE_SPAWN_CENTER[0], CUBE_SPAWN_CENTER[1], CUBE_SIZE / 2)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(SQUARE_CENTER[0], SQUARE_CENTER[1] + 0.13, CUBE_SIZE / 2)),
     )
 
     top = _camera("{ENV_REGEX_NS}/TopCamera", TOP_CAMERA_EYE, TOP_CAMERA_TARGET)
@@ -176,16 +179,18 @@ class ObservationsCfg:
 class EventCfg:
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
     reset_cube = EventTerm(
-        func=mdp.reset_root_state_uniform,
+        func=task_mdp.reset_cube_around_square,
         mode="reset",
         params={
-            "pose_range": {
-                "x": (-CUBE_SPAWN_HALF_RANGE[0], CUBE_SPAWN_HALF_RANGE[0]),
-                "y": (-CUBE_SPAWN_HALF_RANGE[1], CUBE_SPAWN_HALF_RANGE[1]),
-                "yaw": (-math.pi / 4, math.pi / 4),
-            },
-            "velocity_range": {},
-            "asset_cfg": SceneEntityCfg("cube"),
+            "center": SQUARE_CENTER,
+            "radius_range": CUBE_RING_RADIUS,
+            "n_directions": CUBE_RING_DIRECTIONS,
+            "direction_jitter": CUBE_RING_JITTER,
+            "min_x": CUBE_MIN_X,
+            "max_reach": CUBE_MAX_REACH,
+            "reach_origin": (-0.01125, 0.0),
+            "yaw_range": (-math.pi / 4, math.pi / 4),
+            "height": CUBE_SIZE / 2,
         },
     )
 
@@ -195,7 +200,7 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
     success = DoneTerm(
         func=task_mdp.cube_in_square,
-        params={"square_center": SQUARE_CENTER, "square_half_size": SQUARE_SIZE / 2},
+        params={"square_center": SQUARE_CENTER, "square_half_size": (SQUARE_SIZE[0] / 2, SQUARE_SIZE[1] / 2)},
     )
 
 
