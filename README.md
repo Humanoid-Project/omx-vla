@@ -1,4 +1,4 @@
-# lerobot_isaac
+# omx-vla
 
 [![LeRobot](https://img.shields.io/badge/LeRobot-HuggingFace-FFD21E?logo=github&logoColor=black)](https://github.com/huggingface/lerobot)
 [![LeIsaac](https://img.shields.io/badge/LeIsaac-LightwheelAI-4A90D9?logo=github&logoColor=white)](https://github.com/LightwheelAI/leisaac)
@@ -23,19 +23,25 @@ Monorepo combining [LeRobot](https://github.com/huggingface/lerobot) and [LeIsaa
 
 Teleoperation data collection, ACT / SmolVLA training and rollout on the ROBOTIS OMX-AI arm. See [`real/omx/`](real/omx/README.md).
 
+Tasks:
+
+- [`pick_place_red_cube`](tasks/pick_place_red_cube/README.md) — pick up a red cube and place it inside a black square
+
 
 ## Repository Layout
 
 ```
 lerobot/     LeRobot (upstream, unmodified) — datasets, training, real-robot drivers
 leisaac/     LeIsaac (upstream, .gitignore only changed) — Isaac Sim tasks and teleoperation
-real/omx/    Scripts and settings for the real OMX arm
+real/omx/    Scripts and settings for the real OMX arm, shared by all tasks
+sim/omx/     OMX-F description, USD conversion and shared Isaac Lab robot code
+tasks/       One folder per task: task sentence, dataset name, notes, Isaac Lab environment
 ```
 
 
 ## License
 
-The code in this repository outside `lerobot/` and `leisaac/` (`real/`, root files) is licensed under the Apache License 2.0 — see [`LICENSE`](LICENSE).
+The code in this repository outside `lerobot/`, `leisaac/` and `sim/omx/description/` (`real/`, `sim/`, `tasks/`, root files) is licensed under the Apache License 2.0 — see [`LICENSE`](LICENSE).
 
-`lerobot/` and `leisaac/` are third-party code under the Apache License 2.0, each with its own `LICENSE` file.
+`lerobot/`, `leisaac/` and `sim/omx/description/` are third-party code under the Apache License 2.0, each with its own `LICENSE` file.
 Versions, copyright holders, files under other licenses (MIT, BSD-3-Clause) and what is left out of this repository are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

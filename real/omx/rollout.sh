@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+: "${TASK:?TASK is empty, run with TASK_ENV=tasks/<name>/task.env}"
 
 if [ $# -lt 1 ]; then
   echo "usage: $0 <policy_path> [extra lerobot-rollout args]" >&2

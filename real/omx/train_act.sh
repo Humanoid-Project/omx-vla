@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+require_dataset
 
 RUN_NAME="${RUN_NAME:-act_${DATASET_NAME}}"
 

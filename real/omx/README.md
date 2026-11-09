@@ -53,19 +53,39 @@ Replace `FOLLOWER_SERIAL` / `LEADER_SERIAL` with the serials from `/dev/serial/b
 
 The robot moves during `teleoperate.sh`, `record.sh` and `rollout.sh`.
 
+Task settings (task sentence, dataset name, episode count and length) come from a `task.env` file under `tasks/`,
+selected with `TASK_ENV`. `record.sh` and `rollout.sh` stop if no task sentence is set.
+
 ```bash
+export TASK_ENV=tasks/pick_place_red_cube/task.env
 ./real/omx/teleoperate.sh
 ./real/omx/record.sh
-./real/omx/train_act.sh
-./real/omx/train_smolvla.sh
-./real/omx/rollout.sh outputs/train/act_omx_pickplace/checkpoints/last/pretrained_model
+```
+
+`lerobot-record` appends the start time to the dataset name, e.g. `local/omx_pick_place_red_cube_20261108_234512`
+under `~/.cache/huggingface/lerobot/`. Training and resuming take that full name as `DATASET`; without it the scripts
+stop and list the recorded datasets.
+
+```bash
+ls ~/.cache/huggingface/lerobot/local/
+DATASET=local/omx_pick_place_red_cube_20261108_234512 ./real/omx/train_act.sh
+DATASET=local/omx_pick_place_red_cube_20261108_234512 ./real/omx/train_smolvla.sh
+./real/omx/rollout.sh outputs/train/act_omx_pick_place_red_cube/checkpoints/last/pretrained_model
 ```
 
 Every script forwards extra arguments to the underlying `lerobot-*` command, e.g.
 
 ```bash
-./real/omx/record.sh --dataset.num_episodes=10 --resume=true
-./real/omx/train_smolvla.sh --batch_size=4
+DATASET=local/omx_pick_place_red_cube_20261108_234512 ./real/omx/record.sh --resume=true --dataset.num_episodes=10
+DATASET=local/omx_pick_place_red_cube_20261108_234512 ./real/omx/train_smolvla.sh --batch_size=4
 ```
 
+With `--resume=true`, `--dataset.num_episodes` is the number of episodes to add, not the total.
+
+Cameras use MJPG (`CAM_FOURCC`): two uncompressed 640×480 streams on one USB 2.0 hub drop frames.
+`record.sh` encodes video while recording (`--dataset.streaming_encoding=true --dataset.encoder_threads=2`).
+
 Keep `FPS`, camera names, resolution and `TASK` identical between recording and rollout.
+
+To add a task, create `tasks/<name>/task.env` with `TASK`, `DATASET_NAME` and, if needed, `NUM_EPISODES`,
+`EPISODE_TIME_S` and `RESET_TIME_S`.

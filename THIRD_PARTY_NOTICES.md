@@ -37,6 +37,16 @@ copyright and license headers in its source files.
   `assets/` (downloaded separately; they carry their own licenses).
 - Modifications: `leisaac/.gitignore` — removed the `!.vscode` exception (marked at the top of the file).
 
+## ROBOTIS open_manipulator (OMX-F description)
+
+- Source: https://github.com/ROBOTIS-GIT/open_manipulator
+- Version: commit `b83daec7`
+- Location: `sim/omx/description/` (`urdf/omx_f.urdf`, `meshes/`)
+- License: Apache License 2.0 — `sim/omx/description/LICENSE`
+- Copyright: ROBOTIS CO., LTD.
+- Not redistributed here: everything in that repository except the OMX-F URDF and its meshes.
+- Modifications: `urdf/omx_f.urdf` — mesh paths rewritten to `../meshes/` (marked at the top of the file).
+
 ## Modifying these files
 
 Apache License 2.0, section 4(b): a modified file must carry a prominent notice stating that it was changed. Add that

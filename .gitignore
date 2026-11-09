@@ -22,6 +22,9 @@ wandb/
 logs/
 *.log
 
+# Generated from the URDF by sim/omx/convert_urdf.py
+sim/omx/usd/
+
 # Local machine settings
 real/omx/99-omx.rules
 real/omx/env.local.sh
