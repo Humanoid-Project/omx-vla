@@ -27,18 +27,6 @@ Tasks:
 
 - [`pick_place_red_cube`](tasks/pick_place_red_cube/README.md) — pick up a red cube and place it inside a black square
 
-
-## Repository Layout
-
-```
-lerobot/     LeRobot (upstream, unmodified) — datasets, training, real-robot drivers
-leisaac/     LeIsaac (upstream, .gitignore only changed) — Isaac Sim tasks and teleoperation
-real/omx/    Scripts and settings for the real OMX arm, shared by all tasks
-sim/omx/     OMX-F description, USD conversion and shared Isaac Lab robot code
-tasks/       One folder per task: task sentence, dataset name, notes, Isaac Lab environment
-```
-
-
 ## License
 
 The code in this repository outside `lerobot/`, `leisaac/` and `sim/omx/description/` (`real/`, `sim/`, `tasks/`, root files) is licensed under the Apache License 2.0 — see [`LICENSE`](LICENSE).
