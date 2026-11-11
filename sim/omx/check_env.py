@@ -65,7 +65,12 @@ for g in (OMX_GRIPPER_OPEN, OMX_GRIPPER_CLOSED):
     print(f"gripper target {g}: joint {robot.data.joint_pos[0, -2:].tolist()} finger-link distance {d:.4f}", flush=True)
     save(f"gripper_{g}")
 
-for target in [(0.20, 0.0, 0.08), (0.15, 0.10, 0.06), (0.24, -0.10, 0.05), (0.17, 0.12, 0.05)]:
+task_cfg = importlib.import_module(f"{args.task_module}.env_cfg")
+task_mdp = importlib.import_module(f"{args.task_module}.mdp")
+sq_x, sq_y = task_cfg.SQUARE_CENTER
+sq_half = (task_cfg.SQUARE_SIZE[0] / 2, task_cfg.SQUARE_SIZE[1] / 2)
+
+for target in [(0.20, 0.0, 0.08), (0.15, 0.10, 0.06), (0.24, -0.10, 0.05), (sq_x, sq_y, 0.05)]:
     q = inverse_top_down(*target)
     step(list(q) + [0.0], OMX_GRIPPER_OPEN, 60)
     ee = (robot.data.body_pos_w[0, ee_id] - origin).tolist()
@@ -76,20 +81,17 @@ save("reach")
 
 step(home, OMX_GRIPPER_OPEN, 60)
 state = cube.data.default_root_state.clone()
-state[:, :3] = torch.tensor([[0.17, 0.12, 0.016]], device=env.device) + origin
+state[:, :3] = torch.tensor([[sq_x, sq_y, 0.016]], device=env.device) + origin
 cube.write_root_state_to_sim(state)
 step(home, OMX_GRIPPER_OPEN, 30)
-import importlib as _il
-
-task_mdp = _il.import_module(f"{args.task_module}.mdp")
-ok = task_mdp.cube_in_square(env, square_center=(0.17, 0.12), square_half_size=0.035)
+ok = task_mdp.cube_in_square(env, square_center=(sq_x, sq_y), square_half_size=sq_half)
 print("success when cube placed in square:", bool(ok[0]), flush=True)
 save("cube_in_square")
 
-state[:, :3] = torch.tensor([[0.25, -0.05, 0.016]], device=env.device) + origin
+state[:, :3] = torch.tensor([[sq_x, sq_y + sq_half[1] + 0.05, 0.016]], device=env.device) + origin
 cube.write_root_state_to_sim(state)
 step(home, OMX_GRIPPER_OPEN, 30)
-ok = task_mdp.cube_in_square(env, square_center=(0.17, 0.12), square_half_size=0.035)
+ok = task_mdp.cube_in_square(env, square_center=(sq_x, sq_y), square_half_size=sq_half)
 print("success when cube outside:", bool(ok[0]), flush=True)
 print("CHECK_DONE", flush=True)
 sys.stdout.flush()

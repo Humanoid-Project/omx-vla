@@ -33,7 +33,7 @@ import torch
 from isaaclab.utils.math import euler_xyz_from_quat
 from isaaclab_tasks.utils import parse_env_cfg
 from omx.kinematics import JOINT1_XY, forward, inverse_top_down
-from omx.robot_cfg import OMX_ARM_JOINT_NAMES, OMX_GRIPPER_CLOSED, OMX_GRIPPER_OPEN, OMX_HOME_JOINT_POS, OMX_JOINT_NAMES
+from omx.robot_cfg import OMX_ARM_JOINT_NAMES, OMX_GRIPPER_CLOSED, OMX_GRIPPER_OPEN, OMX_JOINT_NAMES
 from pxr import Gf, UsdGeom, UsdLux, UsdShade
 
 import pick_place_red_cube.sim  # noqa: F401
@@ -43,7 +43,7 @@ from pick_place_red_cube.sim.mdp import cube_in_square
 TASK = "OMX-PickPlaceRedCube-v0"
 FPS = task_cfg.FPS
 SETTLE_STEPS = 10
-TAIL_S = 0.5
+TAIL_S = 1.0
 TRANSIT_PHASES = {"approach", "move", "home", "reapproach"}
 
 rng = np.random.default_rng(args.seed)
@@ -59,7 +59,7 @@ cube = env.scene["cube"]
 top_cam = env.scene["top"]
 stage = env.sim.stage
 joint_ids = [robot.joint_names.index(j) for j in OMX_JOINT_NAMES]
-home = np.array([OMX_HOME_JOINT_POS[j] for j in OMX_ARM_JOINT_NAMES])
+home = np.array(task_cfg.HOME_JOINT_POS)
 
 
 def find_shader(root):
@@ -196,18 +196,6 @@ def u(lo, hi):
 
 def chance(p):
     return randomize and rng.random() < p
-
-
-def random_pose():
-    for _ in range(50):
-        try:
-            return arm_q(
-                rng.uniform(0.08, 0.26), rng.uniform(-0.18, 0.18), rng.uniform(0.08, 0.2), 0.0,
-                pitch=math.radians(rng.uniform(60.0, 90.0)), wrist=rng.uniform(-1.0, 1.0),
-            )
-        except ValueError:
-            pass
-    return home.copy()
 
 
 class Recorder:
@@ -390,8 +378,9 @@ def run_episode(rec, speed, knobs):
     rec.vertical("place", sx, sy, place_hover, place_z, place_pitch, w_place, OMX_GRIPPER_CLOSED, d(1.0))
     rec.move("release", rec.q_cmd, OMX_GRIPPER_OPEN, d(0.6))
     rec.vertical("retreat", sx, sy, place_z, place_hover, place_pitch, w_place, OMX_GRIPPER_OPEN, d(0.8))
-    end = random_pose() if chance(0.3) else home + rng.uniform(-0.1, 0.1, 5) * randomize
+    end = home + rng.uniform(-0.05, 0.05, 5) * randomize
     rec.move("home", end, OMX_GRIPPER_OPEN, d(1.5))
+    rec.move("close", rec.q_cmd, OMX_GRIPPER_CLOSED, d(0.5))
     rec.hold("done", TAIL_S)
     return recovered
 
@@ -435,7 +424,7 @@ for ep in range(args.episodes):
     t0 = time.time()
 
     obs, _ = env.reset()
-    start_q = random_pose() if chance(0.5) else home + (rng.uniform(-0.15, 0.15, 5) if randomize else 0.0)
+    start_q = home + (rng.uniform(-0.05, 0.05, 5) if randomize else 0.0)
     jp = robot.data.default_joint_pos.clone()
     arm_ids = [robot.joint_names.index(j) for j in OMX_ARM_JOINT_NAMES]
     jp[0, arm_ids] = torch.tensor(start_q, device=env.device, dtype=jp.dtype)
@@ -466,7 +455,7 @@ for ep in range(args.episodes):
     except ValueError as exc:
         recovered, error = False, str(exc)
     success = error is None and bool(
-        cube_in_square(env, square_center=task_cfg.SQUARE_CENTER, square_half_size=(task_cfg.SQUARE_SIZE[0] / 2, task_cfg.SQUARE_SIZE[1] / 2))[0]
+        cube_in_square(env, square_center=task_cfg.SQUARE_CENTER, square_half_size=(task_cfg.SQUARE_SIZE[0] / 2, task_cfg.SQUARE_SIZE[1] / 2), min_gripper_opening=-1.0)[0]
     )
     cube_end, _ = cube_state()
     np.savez(

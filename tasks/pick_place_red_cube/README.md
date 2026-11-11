@@ -65,6 +65,11 @@ DATASET=local/omx_pick_place_red_cube_sim RUN_NAME=act_sim ./real/omx/train_act.
 ```
 
 Exported units follow the default `omx_follower` recording: arm joints in `RANGE_M100_100` (`rad × 100/π`), gripper
-`60.3 − (0.7 − rad) × 100/(2π)`, larger is more open. The zero, sign and scale were checked against the public dataset
-`maximellerbach/omx_pickandplace`, not against this lab's arm; measure the open gripper value on the real arm and pass it
-as `--gripper_open_units` to `export_lerobot.py` before mixing sim and real data.
+`60.3 − (0.7 − rad) × 100/(2π)`, larger is more open. Checked against `RoboNex-23/omx_pick_place_red_cube` (this lab's
+arm): open gripper 59–61, closed 49 (sim 0 rad → 49.2), and grasp/release positions from forward kinematics land within
+about 2 cm of where the top camera sees the cube and the target area.
+
+The sim scene follows that dataset: top camera 51 cm in front of the base front edge and 40 cm up, tilted about 50° from
+vertical; target area 8.1 × 10.4 cm, its center 15 cm in front of the base front edge and 8 cm to the robot's right; cube
+9–15 cm from the target center in one of 8 directions; start and end at the recorded rest pose, gripper open at the start
+and closed after returning.
