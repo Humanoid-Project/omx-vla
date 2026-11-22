@@ -40,6 +40,7 @@ class MimicGripperAction(ActionTerm):
         if env_ids is None:
             env_ids = slice(None)
         self._raw_actions[env_ids] = 0.0
+        self._processed_actions[env_ids] = 0.0
 
 
 @configclass

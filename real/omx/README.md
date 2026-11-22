@@ -8,6 +8,7 @@ Teleoperation, data recording, training and rollout on the ROBOTIS OMX-AI (OMX-F
 | `env.local.sh.example` | Copy to `env.local.sh` (git-ignored) to override `env.sh` for this machine. |
 | `teleoperate.sh` | Leader → follower teleoperation with camera view. |
 | `record.sh` | Record demonstration episodes into a LeRobotDataset. |
+| `check_dataset.py` | Check a recorded dataset (indices, timestamps, videos, idle head/tail, grasp hold) before merging or uploading. |
 | `train_act.sh` | Train an ACT policy. |
 | `train_smolvla.sh` | Fine-tune SmolVLA from `lerobot/smolvla_base`. |
 | `rollout.sh` | Run a trained policy on the robot. |

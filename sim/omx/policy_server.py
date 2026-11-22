@@ -1,6 +1,7 @@
 import argparse
 import json
 import time
+import traceback
 from multiprocessing.connection import Listener
 
 import numpy as np
@@ -66,23 +67,33 @@ def main():
                 try:
                     while True:
                         msg = conn.recv()
-                        if msg["cmd"] == "reset":
-                            policy.reset()
-                            pre.reset()
-                            post.reset()
-                            conn.send({"ok": True, "type": cfg.type, "policy_path": args.policy_path, "n_action_steps": cfg.n_action_steps,
-                                       "temporal_ensemble_coeff": getattr(cfg, "temporal_ensemble_coeff", None)})
-                        elif msg["cmd"] == "act":
-                            t0 = time.perf_counter()
-                            action = predict_action(
-                                msg["obs"], policy, device, pre, post, use_amp=False, task=msg.get("task"), robot_type="omx_follower"
-                            )
-                            a = action.squeeze(0).float().cpu().tolist()
-                            conn.send({"action": a, "ms": (time.perf_counter() - t0) * 1000})
-                        elif msg["cmd"] == "close":
-                            conn.send({"ok": True})
-                            break
-                except EOFError:
+                        cmd = msg.get("cmd") if isinstance(msg, dict) else None
+                        try:
+                            if cmd == "reset":
+                                policy.reset()
+                                pre.reset()
+                                post.reset()
+                                conn.send({"ok": True, "type": cfg.type, "policy_path": args.policy_path, "n_action_steps": cfg.n_action_steps,
+                                           "temporal_ensemble_coeff": getattr(cfg, "temporal_ensemble_coeff", None)})
+                            elif cmd == "act":
+                                t0 = time.perf_counter()
+                                action = predict_action(
+                                    msg["obs"], policy, device, pre, post, use_amp=False, task=msg.get("task"), robot_type="omx_follower"
+                                )
+                                a = action.squeeze(0).float().cpu().tolist()
+                                conn.send({"action": a, "ms": (time.perf_counter() - t0) * 1000})
+                            elif cmd == "close":
+                                conn.send({"ok": True})
+                                break
+                            else:
+                                conn.send({"error": f"unknown cmd: {cmd!r}"})
+                        except (EOFError, OSError):
+                            raise
+                        except Exception:
+                            err = traceback.format_exc()
+                            print(err, flush=True)
+                            conn.send({"error": err})
+                except (EOFError, OSError):
                     pass
                 print("client disconnected", flush=True)
 

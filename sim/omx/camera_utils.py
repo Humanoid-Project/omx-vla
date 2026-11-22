@@ -7,6 +7,10 @@ def look_at_quat_world(eye, target, up=(0.0, 0.0, 1.0)):
     fx, fy, fz = fx / n, fy / n, fz / n
     lx, ly, lz = up[1] * fz - up[2] * fy, up[2] * fx - up[0] * fz, up[0] * fy - up[1] * fx
     n = math.sqrt(lx * lx + ly * ly + lz * lz)
+    if n < 1e-9:
+        up = (1.0, 0.0, 0.0) if abs(fx) < 0.9 else (0.0, 1.0, 0.0)
+        lx, ly, lz = up[1] * fz - up[2] * fy, up[2] * fx - up[0] * fz, up[0] * fy - up[1] * fx
+        n = math.sqrt(lx * lx + ly * ly + lz * lz)
     lx, ly, lz = lx / n, ly / n, lz / n
     ux, uy, uz = fy * lz - fz * ly, fz * lx - fx * lz, fx * ly - fy * lx
     m = ((fx, lx, ux), (fy, ly, uy), (fz, lz, uz))

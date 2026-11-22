@@ -3,10 +3,20 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 : "${TASK:?TASK is empty, run with TASK_ENV=tasks/<name>/task.env}"
 
-case " $* " in
-  *" --resume=true "*) require_dataset ;;
-  *) DATASET="${DATASET:-$DATASET_BASE}" ;;
-esac
+RESUME=false
+prev=""
+for arg in "$@"; do
+  case "$arg" in
+    --resume=true|--resume=True) RESUME=true ;;
+    true|True) [ "$prev" = "--resume" ] && RESUME=true ;;
+  esac
+  prev="$arg"
+done
+if [ "$RESUME" = true ]; then
+  require_dataset
+else
+  DATASET="${DATASET:-$DATASET_BASE}"
+fi
 
 lerobot-record \
   --robot.type=omx_follower \

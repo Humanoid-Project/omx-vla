@@ -14,6 +14,8 @@ parser.add_argument("--raw", required=True)
 args = parser.parse_args()
 
 rows = [np.load(p, allow_pickle=False) for p in sorted(Path(args.raw).glob("episode_*/data.npz"))]
+info_path = Path(args.raw) / "info.json"
+fps = json.loads(info_path.read_text())["fps"] if info_path.exists() else 30
 if not rows:
     raise SystemExit(f"no episodes in {args.raw}")
 
@@ -23,7 +25,7 @@ print(f"success {success.sum()}/{len(rows)} ({100 * success.mean():.1f} %)")
 errors = [str(r["error"]) for r in rows if str(r["error"])]
 print(f"ik errors {len(errors)}")
 frames = np.array([len(r["state"]) for r in rows])
-print(f"frames total {frames.sum()}  per episode min {frames.min()} mean {frames.mean():.0f} max {frames.max()}  ({frames.sum() / 30 / 60:.1f} min at 30 fps)")
+print(f"frames total {frames.sum()}  per episode min {frames.min()} mean {frames.mean():.0f} max {frames.max()}  ({frames.sum() / fps / 60:.1f} min at {fps} fps)")
 
 knobs = [json.loads(str(r["knobs"])) for r in rows]
 modes = {}

@@ -19,7 +19,7 @@ parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--port", type=int, default=5555)
 parser.add_argument("--authkey", default="omx-vla")
 parser.add_argument("--gripper_open_units", type=float, default=60.3)
-parser.add_argument("--start_gripper_units", type=float, default=49.0)
+parser.add_argument("--start_gripper_units", type=float, default=59.7)
 parser.add_argument("--video_episodes", type=int, default=10)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
@@ -110,10 +110,12 @@ for ep in range(args.episodes):
     cube_start = cube_start.cpu().numpy().round(3).tolist()
     conn.send({"cmd": "reset"})
     server_info = conn.recv()
+    if "error" in server_info:
+        raise RuntimeError(f"policy server: {server_info['error']}")
 
     t0 = time.time()
     steps = int(args.episode_s * FPS)
-    inside_run, success, first_in, ms, max_grip_closed = 0, False, None, [], 99.0
+    inside_run, success, first_in, ms, min_grip = 0, False, None, [], 99.0
     actions = []
     for i in range(steps):
         p = obs["policy"]
@@ -126,10 +128,12 @@ for ep in range(args.episodes):
             "obs": {"observation.state": state, "observation.images.top": top, "observation.images.wrist": wrist},
         })
         reply = conn.recv()
+        if "error" in reply:
+            raise RuntimeError(f"policy server: {reply['error']}")
         a_units = np.asarray(reply["action"], dtype=np.float32)
         ms.append(reply["ms"])
         actions.append(a_units)
-        max_grip_closed = min(max_grip_closed, float(state[5]))
+        min_grip = min(min_grip, float(state[5]))
         obs, *_ = env.step(torch.tensor(to_rad(a_units), device=env.device).unsqueeze(0))
         if writer is not None and ep < args.video_episodes:
             frame = cv2.cvtColor(np.hstack([top, wrist]), cv2.COLOR_RGB2BGR)
@@ -147,7 +151,8 @@ for ep in range(args.episodes):
             inside_run = 0
     cube_end = (cube.data.root_pos_w[0, :3] - env.scene.env_origins[0]).cpu().numpy().round(3).tolist()
     r = dict(episode=ep, success=success, steps=i + 1, first_in_s=first_in, cube_start=cube_start, cube_end=cube_end,
-             min_gripper_units=round(max_grip_closed, 1), infer_ms_median=round(float(np.median(ms)), 1),
+             released=bool(cube_in_square(env, square_center=task_cfg.SQUARE_CENTER, square_half_size=half)[0]),
+             min_gripper_units=round(min_grip, 1), infer_ms_median=round(float(np.median(ms)), 1),
              wall_s=round(time.time() - t0, 1))
     results.append(r)
     acts = np.array(actions)
