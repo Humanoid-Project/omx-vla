@@ -47,9 +47,9 @@ CAMERA_HFOV_DEG = 51.0
 CAMERA_APERTURE = 20.955
 TOP_CAMERA_EYE = (0.57, 0.0, 0.40)
 TOP_CAMERA_TARGET = (0.09, 0.02, 0.0)
-WRIST_CAMERA_EYE = (0.06, 0.0, 0.05)
-WRIST_CAMERA_TARGET = (0.13, 0.0, -0.04)
-WRIST_CAMERA_HFOV_DEG = 51.0
+WRIST_CAMERA_EYE = (0.0709, -0.0037, 0.0354)
+WRIST_CAMERA_ROT = (0.90727, 0.03927, 0.41422, 0.06114)
+WRIST_CAMERA_HFOV_DEG = 71.3
 
 WHITE = (0.9, 0.9, 0.9)
 YELLOW = (0.95, 0.8, 0.1)
@@ -66,10 +66,10 @@ def _box(size, color, collision=True):
     )
 
 
-def _camera(prim_path, eye, target, hfov_deg=CAMERA_HFOV_DEG):
+def _camera(prim_path, eye, target=None, hfov_deg=CAMERA_HFOV_DEG, rot=None):
     return TiledCameraCfg(
         prim_path=prim_path,
-        offset=TiledCameraCfg.OffsetCfg(pos=eye, rot=look_at_quat_world(eye, target), convention="world"),
+        offset=TiledCameraCfg.OffsetCfg(pos=eye, rot=rot if rot is not None else look_at_quat_world(eye, target), convention="world"),
         data_types=["rgb"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=focal_length_for_hfov(hfov_deg, CAMERA_APERTURE),
@@ -131,7 +131,7 @@ class PickPlaceRedCubeSceneCfg(InteractiveSceneCfg):
     )
 
     top = _camera("{ENV_REGEX_NS}/TopCamera", TOP_CAMERA_EYE, TOP_CAMERA_TARGET)
-    wrist = _camera("{ENV_REGEX_NS}/Robot/link5/WristCamera", WRIST_CAMERA_EYE, WRIST_CAMERA_TARGET, WRIST_CAMERA_HFOV_DEG)
+    wrist = _camera("{ENV_REGEX_NS}/Robot/link5/WristCamera", WRIST_CAMERA_EYE, hfov_deg=WRIST_CAMERA_HFOV_DEG, rot=WRIST_CAMERA_ROT)
 
     dome_light = AssetBaseCfg(
         prim_path="/World/DomeLight",

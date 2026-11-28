@@ -21,6 +21,7 @@ parser.add_argument("--authkey", default="omx-vla")
 parser.add_argument("--gripper_open_units", type=float, default=60.3)
 parser.add_argument("--start_gripper_units", type=float, default=59.7)
 parser.add_argument("--video_episodes", type=int, default=10)
+parser.add_argument("--cube_yaw_deg", type=float, default=None)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 args.headless = True
@@ -73,6 +74,8 @@ cfg = parse_env_cfg(TASK, device="cuda:0", num_envs=1)
 cfg.seed = args.seed
 cfg.terminations.time_out = None
 cfg.terminations.success = None
+if args.cube_yaw_deg is not None:
+    cfg.events.reset_cube.params["yaw_range"] = (-math.radians(args.cube_yaw_deg), math.radians(args.cube_yaw_deg))
 env = gym.make(TASK, cfg=cfg).unwrapped
 robot = env.scene["robot"]
 cube = env.scene["cube"]
